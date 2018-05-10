@@ -1,0 +1,61 @@
+# Copyright 2018 Esteve Fernandez
+# Licensed under the Apache License, Version 2.0
+
+import os
+import shutil
+import subprocess
+
+from colcon_core.environment_variable import EnvironmentVariable
+from colcon_core.subprocess import check_output
+
+"""Environment variable to override the Gradle executable"""
+GRADLE_COMMAND_ENVIRONMENT_VARIABLE = EnvironmentVariable(
+    'GRADLE_COMMAND', 'The full path to the Gradle executable')
+
+
+def which_executable(environment_variable, executable_name):
+    """
+    Determine the path of an executable.
+
+    An environment variable can be used to override the location instead of
+    relying on searching the PATH.
+
+    :param str environment_variable: The name of the environment variable
+    :param str executable_name: The name of the executable
+    :rtype: str
+    """
+    value = os.getenv(environment_variable)
+    if value:
+        return value
+    return shutil.which(executable_name)
+
+
+GRADLE_EXECUTABLE = which_executable(
+    GRADLE_COMMAND_ENVIRONMENT_VARIABLE.name, 'gradle')
+
+
+async def has_task(path, task):
+    """
+    Check if the Gradle project has a specific task.
+
+    :param str path: The path of the directory containing the build.gradle file
+    :param str target: The name of the target
+    :rtype: bool
+    """
+    return task in await get_gradle_tasks(path)
+
+
+async def get_gradle_tasks(path):
+    """
+    Get all targets from a `build.gradle`.
+
+    :param str path: The path of the directory contain the build.gradle file
+    :returns: The target names
+    :rtype: list
+    """
+    output = await check_output([
+        GRADLE_EXECUTABLE, 'tasks'], cwd=path)
+    lines = output.decode().splitlines()
+    separator = ' - '
+    return [l.split(separator)[0] for l in lines if separator in l]
+
