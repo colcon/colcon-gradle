@@ -20,7 +20,7 @@ class GradleArgcompleteCompleter(ArgcompleteCompleterExtensionPoint):
             ArgcompleteCompleterExtensionPoint.EXTENSION_POINT_VERSION, '^1.0')
 
     def get_completer(self, parser, *args, **kwargs):  # noqa: D102
-        if ''--gradle-args' not in args:
+        if '--gradle-args' not in args:
             return None
 
         try:
