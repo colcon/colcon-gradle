@@ -84,7 +84,7 @@ class GradleBuildTask(TaskExtensionPoint):
 
         # invoke build step
         return await check_call(
-            self.context, cmd, cwd=args.build_base, env=env)
+            self.context, cmd, cwd=args.path, env=env)
 
 def has_local_executable(args):
     gradle_path = get_local_executable(args)
@@ -94,3 +94,4 @@ def get_local_executable(args):
     gradle_script = 'gradlew.bat' if IS_WINDOWS else 'gradlew'
     gradle_path = Path(args.path) / gradle_script
     return gradle_path
+
