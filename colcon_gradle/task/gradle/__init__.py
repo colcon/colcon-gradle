@@ -11,6 +11,13 @@ from colcon_core.subprocess import check_output
 """Environment variable to override the Gradle executable"""
 GRADLE_COMMAND_ENVIRONMENT_VARIABLE = EnvironmentVariable(
     'GRADLE_COMMAND', 'The full path to the Gradle executable')
+    
+"""Environment variable to override the Gradle executable"""
+GRADLE_HOME_ENVIRONMENT_VARIABLE = EnvironmentVariable(
+    'GRADLE_HOME', 'The full path to the Gradle home')
+
+"""Check OS"""
+IS_WINDOWS = os.name == 'nt' # TODO need to be in Colcon-core ?
 
 
 def which_executable(environment_variable, executable_name):
@@ -24,11 +31,23 @@ def which_executable(environment_variable, executable_name):
     :param str executable_name: The name of the executable
     :rtype: str
     """
-    value = os.getenv(environment_variable)
-    if value:
-        return value
-    return shutil.which(executable_name)
+    cmd = None
+    env_cmd  = os.getenv(environment_variable)
+    env_home = os.getenv(GRADLE_HOME_ENVIRONMENT_VARIABLE.name)
+    
+    # Case of GRADLE_COMMAND (colcon)
+    if env_cmd:
+        cmd = env_cmd
 
+    # Case of GRADLE_HOME (official)
+    elif env_home:
+        cmd = Path(env_home) / 'bin' / executable_name
+
+    # fall back (from PATH)
+    if cmd is None:
+        cmd = shutil.which(executable_name)
+
+    return cmd
 
 GRADLE_EXECUTABLE = which_executable(
     GRADLE_COMMAND_ENVIRONMENT_VARIABLE.name, 'gradle')
