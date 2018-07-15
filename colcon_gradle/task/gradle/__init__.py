@@ -2,6 +2,7 @@
 # Licensed under the Apache License, Version 2.0
 
 import os
+from pathlib import Path
 import shutil
 import subprocess
 
@@ -36,12 +37,14 @@ def which_executable(environment_variable, executable_name):
     env_home = os.getenv(GRADLE_HOME_ENVIRONMENT_VARIABLE.name)
     
     # Case of GRADLE_COMMAND (colcon)
-    if env_cmd:
+    if env_cmd is not None and Path(env_cmd).is_file():
         cmd = env_cmd
 
     # Case of GRADLE_HOME (official)
-    elif env_home:
-        cmd = Path(env_home) / 'bin' / executable_name
+    if cmd is None and env_home is not None:
+        gradle_path = Path(env_home) / 'bin' / executable_name
+        if gradle_path.is_file():
+            cmd = gradle_path
 
     # fall back (from PATH)
     if cmd is None:
