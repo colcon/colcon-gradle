@@ -69,6 +69,6 @@ class GradleBuildTask(TaskExtensionPoint):
         if args.gradle_task:
             cmd += [args.gradle_task]
         else:
-            cmd += ['build']
+            cmd += ['assemble']
         return await check_call(
             self.context, cmd, cwd=args.build_base, env=env)
