@@ -18,7 +18,7 @@ GRADLE_HOME_ENVIRONMENT_VARIABLE = EnvironmentVariable(
     'GRADLE_HOME', 'The full path to the Gradle home')
 
 """Check OS"""
-IS_WINDOWS = os.name == 'nt' # TODO need to be in Colcon-core ?
+IS_WINDOWS = os.name == 'nt'
 
 
 def which_executable(environment_variable, executable_name):
@@ -46,7 +46,7 @@ def which_executable(environment_variable, executable_name):
         if gradle_path.is_file():
             cmd = gradle_path
 
-    # fall back (from PATH)
+    # fallback (from PATH)
     if cmd is None:
         cmd = shutil.which(executable_name)
 

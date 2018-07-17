@@ -30,14 +30,10 @@ class GradlePackageIdentification(PackageIdentificationExtensionPoint):
 
         data = extract_data(build_gradle)
         if not data['name'] and not metadata.name:
-            msg = ("Failed to extract project name from '%s'" % build_gradle)
-            logger.error(msg)
-            raise RuntimeError(msg)
+            raise RuntimeError("Failed to extract project name from '%s'" % build_gradle)
 
         if metadata.name is not None and metadata.name != data['name']:
-            msg = 'Package name already set to different value'
-            logger.error(msg)
-            raise RuntimeError(msg)
+            raise RuntimeError('Package name already set to different value')
 
         metadata.type = 'gradle'
         if metadata.name is None:
@@ -53,24 +49,25 @@ def extract_data(build_gradle):
     :param Path build_gradle: The path of the build.gradle file
     :rtype: dict
     """
-    content = extract_content(build_gradle)
+    # Content for dependencies
+    content_build_gradle = extract_content(build_gradle)
+    
+    # Content for name
+    content_setting_gradle = extract_content(build_gradle.parent, 'settings.gradle')
 
     data = {}
-    data['name'] = extract_project_name(content)
-    # fall back to use the directory name
+    data['name'] = extract_project_name(content_setting_gradle)
+    # fallback to the directory name
     if data['name'] is None:
         data['name'] = build_gradle.parent.name
 
-    # extractᴃdependenciesᴃfromᴃallᴃGradleᴃfilesᴃinᴃtheᴃprojectᴃdirectory
+    # extract dependencies from all Gradle files in the project directory
     data['depends'] = set()
-
-    # excludeᴃself references
-    #data['depends'] = depends - {data['name']}
 
     return data
 
 
-def extract_content(basepath, exclude=None):
+def extract_content(basepath, filename='build.gradle', exclude=None):
     """
     Get all non-comment lines from build.gradle files under the given basepath.
 
@@ -88,7 +85,7 @@ def extract_content(basepath, exclude=None):
             dirnames.sort()
 
             for name in sorted(filenames):
-                if name != 'build.gradle':
+                if name != filename:
                     continue
 
                 path = Path(dirpath) / name
@@ -98,10 +95,11 @@ def extract_content(basepath, exclude=None):
                 content += path.read_text(errors='replace') + '\n'
     else:
         return ''
-    return _remove_cmake_comments(content)
+    return _remove_gradle_comments(content)
 
 
-def _remove_cmake_comments(content):
+def _remove_gradle_comments(content):
+    # base on https://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments#241506
     def replacer(match):
         s = match.group(0)
         if s.startswith('/'):
@@ -125,8 +123,9 @@ def extract_project_name(content):
     :returns: The project name, otherwise None
     :rtype: str
     """
-    # extractᴃproject name
+    # extract project name
     match = re.search(
+        # https://regex101.com/r/KzrkzB/1/
         #ᴃkeyword
         'rootProject.name'
         # optional white space
@@ -136,7 +135,7 @@ def extract_project_name(content):
         # optional white space
         '\s*'
         # optional "opening" quote
-        '("?)'
+        '("|\')'
         # project name
         '([a-zA-Z0-9_-]+)'
         # optional "closing" quote (only if an "opening" quote was used)
