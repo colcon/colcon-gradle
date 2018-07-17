@@ -87,10 +87,10 @@ class GradleBuildTask(TaskExtensionPoint):
             self.context, cmd, cwd=args.build_base, env=env)
 
 def has_local_executable(args):
-    gradle_path   = get_local_executable(args)
+    gradle_path = get_local_executable(args)
     return gradle_path.is_file()
 
 def get_local_executable(args):
     gradle_script = 'gradlew.bat' if IS_WINDOWS else 'gradlew'
-    gradle_path   = Path(args.path) / gradle_script
+    gradle_path = Path(args.path) / gradle_script
     return gradle_path
