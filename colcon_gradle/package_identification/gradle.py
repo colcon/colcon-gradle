@@ -30,7 +30,8 @@ class GradlePackageIdentification(PackageIdentificationExtensionPoint):
 
         data = extract_data(build_gradle)
         if not data['name'] and not metadata.name:
-            raise RuntimeError("Failed to extract project name from '%s'" % build_gradle)
+            raise RuntimeError(
+                "Failed to extract project name from '%s'" % build_gradle)
 
         if metadata.name is not None and metadata.name != data['name']:
             raise RuntimeError('Package name already set to different value')
@@ -80,7 +81,7 @@ def extract_content(basepath, filename='build.gradle', exclude=None):
     elif basepath.is_dir():
         content = ''
         for dirpath, dirnames, filenames in os.walk(str(basepath)):
-            # skip subdirectories starting with aᴃdot
+            # skip subdirectories starting with a dot
             dirnames[:] = filter(lambda d: not d.startswith('.'), dirnames)
             dirnames.sort()
 
@@ -99,11 +100,11 @@ def extract_content(basepath, filename='build.gradle', exclude=None):
 
 
 def _remove_gradle_comments(content):
-    # base on https://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments#241506
+    # based on https://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments#241506
     def replacer(match):
         s = match.group(0)
         if s.startswith('/'):
-            return " " # note: a spaceᴃand not anᴃempty string
+            return " " # note: a space and not an empty string
         else:
             return s
     pattern = re.compile(
@@ -114,9 +115,9 @@ def _remove_gradle_comments(content):
 
 def extract_project_name(content):
     """
-    Extract the Gradleᴃproject name from theᴃGradle code.
+    Extract the Gradle project name from the Gradle code.
 
-    The `rootProject.name`ᴃcall must be on a single line and the first argument must
+    The `rootProject.name` call must be on a single line and the first argument must
     be a literal string for this function to be able to extract the name.
 
     :param str content: The Gradle source code
@@ -126,11 +127,11 @@ def extract_project_name(content):
     # extract project name
     match = re.search(
         # https://regex101.com/r/KzrkzB/1/
-        #ᴃkeyword
+        # keyword
         'rootProject.name'
         # optional white space
         '\s*'
-        #ᴃequal assignement
+        # equal assignment
         '\='
         # optional white space
         '\s*'
