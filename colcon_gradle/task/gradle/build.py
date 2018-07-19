@@ -5,18 +5,19 @@ import ast
 from distutils import dir_util
 import glob
 import os
-from pathlib import Path
 import re
 import shutil
 
 from colcon_gradle.task.gradle import GRADLE_EXECUTABLE
-from colcon_gradle.task.gradle import IS_WINDOWS
 from colcon_core.environment import create_environment_scripts
 from colcon_core.logging import colcon_logger
 from colcon_core.plugin_system import satisfies_version
 from colcon_core.shell import get_command_environment
 from colcon_core.task import check_call
 from colcon_core.task import TaskExtensionPoint
+from colcon_gradle.task.gradle import has_local_executable
+from colcon_gradle.task.gradle import get_local_executable
+
 
 logger = colcon_logger.getChild(__name__)
 
@@ -151,11 +152,3 @@ class GradleBuildTask(TaskExtensionPoint):
             jar_filename = os.path.basename(jar)
             shutil.copy2(jar, os.path.join(dst_package_jar_dir, jar_filename))
 
-def has_local_executable(args):
-    gradle_path = get_local_executable(args)
-    return gradle_path.is_file()
-
-def get_local_executable(args):
-    gradle_script = 'gradlew.bat' if IS_WINDOWS else 'gradlew'
-    gradle_path = Path(args.path) / gradle_script
-    return gradle_path
