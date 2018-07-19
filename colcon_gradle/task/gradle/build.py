@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 
 from colcon_gradle.task.gradle import GRADLE_EXECUTABLE
+from colcon_gradle.task.gradle import IS_WINDOWS
 from colcon_core.environment import create_environment_scripts
 from colcon_core.logging import colcon_logger
 from colcon_core.plugin_system import satisfies_version
@@ -62,13 +63,34 @@ class GradleBuildTask(TaskExtensionPoint):
     async def _build(self, args, env):
         self.progress('build')
 
-        # invoke build step
-        if GRADLE_EXECUTABLE is None:
-            raise RuntimeError("Could not find 'gradle' executable")
-        cmd = [GRADLE_EXECUTABLE]
+        # Gradle Executable
+        if has_local_executable(args):
+            cmd = [str(get_local_executable(args).absolute())]
+        elif GRADLE_EXECUTABLE is not None:
+            cmd = [GRADLE_EXECUTABLE]
+        else:
+            msg = "Could not find 'gradle' or 'wrapper' executable"
+            logger.error(msg)
+            raise RuntimeError(msg)
+
+        # Gradle Task (by default 'build')
         if args.gradle_task:
             cmd += [args.gradle_task]
         else:
             cmd += ['assemble']
+
+        # Gradle Arguments
+        cmd += args.gradle_args
+
+        # invoke build step
         return await check_call(
             self.context, cmd, cwd=args.build_base, env=env)
+
+def has_local_executable(args):
+    gradle_path = get_local_executable(args)
+    return gradle_path.is_file()
+
+def get_local_executable(args):
+    gradle_script = 'gradlew.bat' if IS_WINDOWS else 'gradlew'
+    gradle_path = Path(args.path) / gradle_script
+    return gradle_path
