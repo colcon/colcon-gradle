@@ -115,12 +115,11 @@ def _remove_gradle_comments(content):
 
 def extract_project_name(content):
     """
-    Extract the Gradle project name from the Gradle code.
+    Extract the Gradle project name from the Gradle settings file.
 
-    The `rootProject.name` call must be on a single line and the first argument must
-    be a literal string for this function to be able to extract the name.
+    Find `rootProject.name` declaration in settings file.
 
-    :param str content: The Gradle source code
+    :param str content: The Gradle build file
     :returns: The project name, otherwise None
     :rtype: str
     """
@@ -128,11 +127,11 @@ def extract_project_name(content):
     match = re.search(
         # https://regex101.com/r/KzrkzB/1/
         # keyword
-        'rootProject.name'
+        'rootProject\.name'
         # optional white space
         '\s*'
         # equal assignment
-        '\='
+        '='
         # optional white space
         '\s*'
         # optional "opening" quote
