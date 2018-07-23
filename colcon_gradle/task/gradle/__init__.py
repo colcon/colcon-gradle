@@ -2,6 +2,7 @@
 # Licensed under the Apache License, Version 2.0
 
 import os
+from pathlib import Path
 import shutil
 import subprocess
 
@@ -11,6 +12,13 @@ from colcon_core.subprocess import check_output
 """Environment variable to override the Gradle executable"""
 GRADLE_COMMAND_ENVIRONMENT_VARIABLE = EnvironmentVariable(
     'GRADLE_COMMAND', 'The full path to the Gradle executable')
+    
+"""Environment variable to override the Gradle executable"""
+GRADLE_HOME_ENVIRONMENT_VARIABLE = EnvironmentVariable(
+    'GRADLE_HOME', 'The full path to the Gradle home')
+
+"""Check OS"""
+IS_WINDOWS = os.name == 'nt'
 
 """Check OS"""
 IS_WINDOWS = os.name == 'nt'
@@ -26,11 +34,25 @@ def which_executable(environment_variable, executable_name):
     :param str executable_name: The name of the executable
     :rtype: str
     """
-    value = os.getenv(environment_variable)
-    if value:
-        return value
-    return shutil.which(executable_name)
+    cmd = None
+    env_cmd = os.getenv(environment_variable)
+    env_home = os.getenv(GRADLE_HOME_ENVIRONMENT_VARIABLE.name)
+    
+    # Case of GRADLE_COMMAND (colcon)
+    if env_cmd is not None and Path(env_cmd).is_file():
+        cmd = env_cmd
 
+    # Case of GRADLE_HOME (official)
+    if cmd is None and env_home is not None:
+        gradle_path = Path(env_home) / 'bin' / executable_name
+        if gradle_path.is_file():
+            cmd = gradle_path
+
+    # fallback (from PATH)
+    if cmd is None:
+        cmd = shutil.which(executable_name)
+
+    return cmd
 
 GRADLE_EXECUTABLE = which_executable(
     GRADLE_COMMAND_ENVIRONMENT_VARIABLE.name, 'gradle')
