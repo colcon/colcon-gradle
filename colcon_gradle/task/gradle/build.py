@@ -114,7 +114,7 @@ class GradleBuildTask(TaskExtensionPoint):
         else:
             raise RuntimeError("Could not find 'gradle' or 'wrapper' executable")
 
-        # Gradle Task (by default 'build')
+        # Gradle Task (by default 'assemble')
         if args.gradle_task:
             cmd += [args.gradle_task]
         else:
