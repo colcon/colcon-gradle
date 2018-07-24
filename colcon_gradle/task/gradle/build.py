@@ -2,9 +2,12 @@
 # Licensed under the Apache License, Version 2.0
 
 import ast
+from distutils import dir_util
+import glob
 import os
 from pathlib import Path
 import re
+import shutil
 
 from colcon_gradle.task.gradle import GRADLE_EXECUTABLE
 from colcon_gradle.task.gradle import IS_WINDOWS
@@ -24,6 +27,21 @@ class GradleBuildTask(TaskExtensionPoint):
     def __init__(self):  # noqa: D107
         super().__init__()
         satisfies_version(TaskExtensionPoint.EXTENSION_POINT_VERSION, '^1.0')
+
+    def _build_file_tree(self, start_path):
+        out_dirnames = set()
+        out_filenames = set()
+        for dirname, dirnames, filenames in os.walk(start_path):
+            for subdirname in dirnames:
+                out_dirnames.add(
+                    os.path.relpath(
+                        os.path.join(dirname, subdirname), start=start_path))
+
+            for filename in filenames:
+                out_filenames.add(
+                    os.path.relpath(
+                        os.path.join(dirname, filename), start=start_path))
+        return (out_dirnames, out_filenames)
 
     def add_arguments(self, *, parser):  # noqa: D102
         parser.add_argument(
@@ -56,6 +74,10 @@ class GradleBuildTask(TaskExtensionPoint):
         if rc and rc.returncode:
             return rc.returncode
 
+        rc = await self._install(args, env)
+        if rc and rc.returncode:
+            return rc.returncode
+
         if not skip_hook_creation:
             create_environment_scripts(
                 pkg, args, additional_hooks=additional_hooks)
@@ -63,15 +85,33 @@ class GradleBuildTask(TaskExtensionPoint):
     async def _build(self, args, env):
         self.progress('build')
 
+        # remove anything that's on the destination tree but not in the source tree
+        src_package_src_dir = os.path.join(args.path, 'src')
+        dst_package_src_dir = os.path.join(args.build_base, 'src')
+
+        src_dirnames, src_filenames = self._build_file_tree(src_package_src_dir)
+        dst_dirnames, dst_filenames = self._build_file_tree(dst_package_src_dir)
+
+        prune_dirnames = dst_dirnames - src_dirnames
+        prune_filenames = dst_filenames - src_filenames
+
+        for prune_filename in prune_filenames:
+            os.remove(os.path.join(dst_package_src_dir, prune_filename))
+        for prune_dirname in prune_dirnames:
+            if os.path.exists(prune_dirname):
+                shutil.rmtree(os.path.join(dst_package_src_dir, prune_dirname))
+
+        # copy files from the source directory to the build one to avoid poluting the latter
+        # during the build process
+        dir_util.copy_tree(args.path, args.build_base, update=1)
+
         # Gradle Executable
         if has_local_executable(args):
             cmd = [str(get_local_executable(args).absolute())]
         elif GRADLE_EXECUTABLE is not None:
             cmd = [GRADLE_EXECUTABLE]
         else:
-            msg = "Could not find 'gradle' or 'wrapper' executable"
-            logger.error(msg)
-            raise RuntimeError(msg)
+            raise RuntimeError("Could not find 'gradle' or 'wrapper' executable")
 
         # Gradle Task (by default 'build')
         if args.gradle_task:
@@ -85,6 +125,31 @@ class GradleBuildTask(TaskExtensionPoint):
         # invoke build step
         return await check_call(
             self.context, cmd, cwd=args.build_base, env=env)
+
+    async def _install(self, args, env):
+        self.progress('install')
+        pkg = self.context.pkg
+
+        # remove anything that's on the destination tree but not in the build tree
+        bld_package_jar_dir = os.path.join(args.build_base, 'build', 'libs')
+        dst_package_jar_dir = os.path.join(args.install_base, 'share', pkg.name, 'java')
+        os.makedirs(dst_package_jar_dir, exist_ok=True)
+
+        bld_dirnames, bld_filenames = self._build_file_tree(bld_package_jar_dir)
+        dst_dirnames, dst_filenames = self._build_file_tree(dst_package_jar_dir)
+
+        prune_dirnames = dst_dirnames - bld_dirnames
+        prune_filenames = dst_filenames - bld_filenames
+
+        for prune_filename in prune_filenames:
+            os.remove(os.path.join(dst_package_jar_dir, prune_filename))
+        for prune_dirname in prune_dirnames:
+            if os.path.exists(prune_dirname):
+                shutil.rmtree(os.path.join(dst_package_jar_dir, prune_dirname))
+
+        for jar in glob.glob(os.path.join(bld_package_jar_dir, '*.jar')):
+            jar_filename = os.path.basename(jar)
+            shutil.copy2(jar, os.path.join(dst_package_jar_dir, jar_filename))
 
 def has_local_executable(args):
     gradle_path = get_local_executable(args)
