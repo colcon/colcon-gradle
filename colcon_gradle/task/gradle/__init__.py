@@ -83,7 +83,7 @@ async def get_gradle_tasks(path):
     separator = ' - '
     return [l.split(separator)[0] for l in lines if separator in l]
 
-def has_local_executable(args):
+def has_wrapper_executable(args):
     """
     Check if Gradle wrapper executable is available on project.
     
@@ -91,10 +91,10 @@ def has_local_executable(args):
     :returns: True if exist
     :rtype: bool
     """
-    gradle_path = get_local_executable(args)
+    gradle_path = get_wrapper_executable(args)
     return gradle_path.is_file()
 
-def get_local_executable(args):
+def get_wrapper_executable(args):
     """
     Get Gradle wrapper executable.
     
