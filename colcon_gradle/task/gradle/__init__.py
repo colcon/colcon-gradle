@@ -83,3 +83,25 @@ async def get_gradle_tasks(path):
     separator = ' - '
     return [l.split(separator)[0] for l in lines if separator in l]
 
+def has_local_executable(args):
+    """
+    Check if Gradle wrapper executable is available on project.
+    
+    :param Arguments args: 
+    :returns: True if exist
+    :rtype: bool
+    """
+    gradle_path = get_local_executable(args)
+    return gradle_path.is_file()
+
+def get_local_executable(args):
+    """
+    Get Gradle wrapper executable.
+    
+    :param Arguments args: Argument 
+    :returns: The path of Gradle Wrapper executable
+    :rtype: Path
+    """
+    gradle_script = 'gradlew.bat' if IS_WINDOWS else 'gradlew'
+    gradle_path = Path(args.path) / gradle_script
+    return gradle_path
