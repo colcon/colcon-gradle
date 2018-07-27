@@ -10,8 +10,8 @@ from colcon_core.shell import get_command_environment
 from colcon_core.subprocess import check_output
 from colcon_core.task import check_call
 from colcon_core.task import TaskExtensionPoint
-from colcon_gradle.task.gradle import has_local_executable
-from colcon_gradle.task.gradle import get_local_executable
+from colcon_gradle.task.gradle import has_wrapper_executable
+from colcon_gradle.task.gradle import get_wrapper_executable
 
 
 logger = colcon_logger.getChild(__name__)
@@ -57,8 +57,8 @@ class GradleTestTask(TaskExtensionPoint):
         self.progress('test')
 
         # Gradle Executable
-        if has_local_executable(args):
-            cmd = [str(get_local_executable(args).absolute())]
+        if has_wrapper_executable(args):
+            cmd = [str(get_wrapper_executable(args).absolute())]
         elif GRADLE_EXECUTABLE is not None:
             cmd = [GRADLE_EXECUTABLE]
         else:
