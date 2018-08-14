@@ -122,6 +122,7 @@ class GradleBuildTask(TaskExtensionPoint):
 
         # Gradle Arguments
         cmd += (args.gradle_args or [])
+        cmd += ['--stacktrace']
 
         # invoke build step
         return await check_call(

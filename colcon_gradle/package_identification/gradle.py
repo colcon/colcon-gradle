@@ -40,8 +40,8 @@ class GradlePackageIdentification(PackageIdentificationExtensionPoint):
         if metadata.name is None:
             metadata.name = data['name']
         metadata.dependencies['build'] |= data['depends']
-        metadata.dependencies['run']   |= data['depends']
-        metadata.dependencies['test']  |= data['depends']
+        metadata.dependencies['run'] |= data['depends']
+        metadata.dependencies['test'] |= data['depends']
 
 def extract_data(build_gradle):
     """
@@ -54,10 +54,10 @@ def extract_data(build_gradle):
     content_build_gradle = extract_content(build_gradle)
     
     # Content for name
-    content_setting_gradle = extract_content(build_gradle.parent, 'settings.gradle')
+    content_settings_gradle = extract_content(build_gradle.parent, 'settings.gradle')
 
     data = {}
-    data['name'] = extract_project_name(content_setting_gradle)
+    data['name'] = extract_project_name(content_settings_gradle)
     # fallback to the directory name
     if data['name'] is None:
         data['name'] = build_gradle.parent.name
