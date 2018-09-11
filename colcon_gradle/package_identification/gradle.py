@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 
+from colcon_core.dependency_descriptor import DependencyDescriptor
 from colcon_core.package_identification import logger
 from colcon_core.package_identification \
     import PackageIdentificationExtensionPoint
@@ -39,9 +40,13 @@ class GradlePackageIdentification(PackageIdentificationExtensionPoint):
         metadata.type = 'gradle'
         if metadata.name is None:
             metadata.name = data['name']
-        metadata.dependencies['build'] |= data['depends']
-        metadata.dependencies['run'] |= data['depends']
-        metadata.dependencies['test'] |= data['depends']
+
+        metadata.dependencies['build'] |= {
+            DependencyDescriptor(name) for name in data['depends']}
+        metadata.dependencies['run'] |= {
+            DependencyDescriptor(name) for name in data['depends']}
+        metadata.dependencies['test'] |= {
+            DependencyDescriptor(name) for name in data['depends']}
 
 def extract_data(build_gradle):
     """
