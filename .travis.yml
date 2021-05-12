@@ -1,6 +1,11 @@
 language: python
 python: "3.5"
-dist: trusty
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+    - os: linux
+      dist: focal
 sudo: true
 before_install:
   - sudo apt update && sudo apt install -y enchant
