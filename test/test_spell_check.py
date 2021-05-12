@@ -25,8 +25,7 @@ def test_spell_check():
             '--enable=spelling',
             '--spelling-dict=en_US',
             '--ignore-comments=no',
-            '--spelling-private-dict-file=' +
-            str(spell_check_words_path),
+            '--spelling-private-dict-file=' + str(spell_check_words_path),
             str(Path(__file__).parents[1] / 'colcon_gradle'),
         ] + [
             str(p) for p in
@@ -44,4 +43,3 @@ def test_spell_check_word_list():
         lines = h.read().splitlines()
     assert lines == sorted(lines), \
         'The word list should be ordered alphabetically'
-

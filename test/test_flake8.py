@@ -27,7 +27,7 @@ def test_flake8():
     sys.stdout = sys.stderr
     # implicitly calls report_errors()
     report = style_guide.check_files([
-        str(Path(__file__).parents[1] / 'colcon_cmake'),
+        str(Path(__file__).parents[1] / 'colcon_gradle'),
     ])
     report_tests = style_guide_tests.check_files([
         str(Path(__file__).parents[1] / 'test'),
@@ -45,4 +45,3 @@ def test_flake8():
 
     assert not report.total_errors, \
         'flake8 reported {total_errors} errors'.format_map(locals())
-
