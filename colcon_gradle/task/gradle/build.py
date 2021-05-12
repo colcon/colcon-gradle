@@ -102,7 +102,7 @@ class GradleBuildTask(TaskExtensionPoint):
             if os.path.exists(prune_dirname):
                 shutil.rmtree(os.path.join(dst_package_src_dir, prune_dirname))
 
-        # copy files from the source directory to the build one to avoid poluting the latter
+        # copy files from the source directory to the build one to avoid polluting the latter
         # during the build process
         dir_util.copy_tree(args.path, args.build_base, update=1)
 

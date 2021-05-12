@@ -81,7 +81,7 @@ def extract_content(basepath, filename='build.gradle', exclude=None):
     elif basepath.is_dir():
         content = ''
         for dirpath, dirnames, filenames in os.walk(str(basepath)):
-            # skip subdirectories starting with a dot
+            # skip sub-directories starting with a dot
             dirnames[:] = filter(lambda d: not d.startswith('.'), dirnames)
             dirnames.sort()
 

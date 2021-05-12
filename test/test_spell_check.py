@@ -27,7 +27,7 @@ def test_spell_check():
             '--ignore-comments=no',
             '--spelling-private-dict-file=' +
             str(spell_check_words_path),
-            str(Path(__file__).parents[1] / 'colcon_cmake'),
+            str(Path(__file__).parents[1] / 'colcon_gradle'),
         ] + [
             str(p) for p in
             (Path(__file__).parents[1] / 'test').glob('**/*.py')
