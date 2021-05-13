@@ -1,17 +1,14 @@
 # Copyright 2018 Esteve Fernandez
 # Licensed under the Apache License, Version 2.0
 
-import os
-
-from colcon_core.event.test import TestFailure
 from colcon_core.logging import colcon_logger
 from colcon_core.plugin_system import satisfies_version
 from colcon_core.shell import get_command_environment
-from colcon_core.subprocess import check_output
 from colcon_core.task import check_call
 from colcon_core.task import TaskExtensionPoint
-from colcon_gradle.task.gradle import has_wrapper_executable
 from colcon_gradle.task.gradle import get_wrapper_executable
+from colcon_gradle.task.gradle import GRADLE_EXECUTABLE
+from colcon_gradle.task.gradle import has_wrapper_executable
 
 
 logger = colcon_logger.getChild(__name__)
@@ -38,7 +35,7 @@ class GradleTestTask(TaskExtensionPoint):
     async def test(self, *, additional_hooks=None):  # noqa: D102
         pkg = self.context.pkg
         args = self.context.args
-        
+
         logger.info(
             "Testing Gradle package in '{args.path}'".format_map(locals()))
 
@@ -48,7 +45,7 @@ class GradleTestTask(TaskExtensionPoint):
         except RuntimeError as e:
             logger.error(str(e))
             return 1
-        
+
         rc = await self._test(args, env)
         if rc and rc.returncode:
             return rc.returncode
@@ -79,4 +76,3 @@ class GradleTestTask(TaskExtensionPoint):
         # invoke build step
         return await check_call(
             self.context, cmd, cwd=args.build_base, env=env)
-

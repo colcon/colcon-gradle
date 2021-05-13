@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 import re
 
-from colcon_core.package_identification import logger
 from colcon_core.package_identification \
     import PackageIdentificationExtensionPoint
 from colcon_core.plugin_system import satisfies_version
@@ -43,6 +42,7 @@ class GradlePackageIdentification(PackageIdentificationExtensionPoint):
         metadata.dependencies['run'] |= data['depends']
         metadata.dependencies['test'] |= data['depends']
 
+
 def extract_data(build_gradle):
     """
     Extract the project name and dependencies from a build.gradle file.
@@ -50,11 +50,9 @@ def extract_data(build_gradle):
     :param Path build_gradle: The path of the build.gradle file
     :rtype: dict
     """
-    # Content for dependencies
-    content_build_gradle = extract_content(build_gradle)
-    
     # Content for name
-    content_settings_gradle = extract_content(build_gradle.parent, 'settings.gradle')
+    content_settings_gradle = extract_content(
+        build_gradle.parent, 'settings.gradle')
 
     data = {}
     data['name'] = extract_project_name(content_settings_gradle)
@@ -81,7 +79,7 @@ def extract_content(basepath, filename='build.gradle', exclude=None):
     elif basepath.is_dir():
         content = ''
         for dirpath, dirnames, filenames in os.walk(str(basepath)):
-            # skip subdirectories starting with a dot
+            # skip sub-directories starting with a dot
             dirnames[:] = filter(lambda d: not d.startswith('.'), dirnames)
             dirnames.sort()
 
@@ -100,11 +98,11 @@ def extract_content(basepath, filename='build.gradle', exclude=None):
 
 
 def _remove_gradle_comments(content):
-    # based on https://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments#241506
+    # based on https://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments#241506  # noqa: E501
     def replacer(match):
         s = match.group(0)
         if s.startswith('/'):
-            return " " # note: a space and not an empty string
+            return ' '  # note: a space and not an empty string
         else:
             return s
     pattern = re.compile(
@@ -112,6 +110,7 @@ def _remove_gradle_comments(content):
         re.DOTALL | re.MULTILINE
     )
     return re.sub(pattern, replacer, content)
+
 
 def extract_project_name(content):
     """
@@ -127,13 +126,13 @@ def extract_project_name(content):
     match = re.search(
         # https://regex101.com/r/KzrkzB/1/
         # keyword
-        'rootProject\.name'
+        r'rootProject\.name'
         # optional white space
-        '\s*'
+        r'\s*'
         # equal assignment
         '='
         # optional white space
-        '\s*'
+        r'\s*'
         # optional "opening" quote
         '("|\')'
         # project name

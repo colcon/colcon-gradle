@@ -4,7 +4,6 @@
 import os
 from pathlib import Path
 import shutil
-import subprocess
 
 from colcon_core.environment_variable import EnvironmentVariable
 from colcon_core.subprocess import check_output
@@ -12,7 +11,7 @@ from colcon_core.subprocess import check_output
 """Environment variable to override the Gradle executable"""
 GRADLE_COMMAND_ENVIRONMENT_VARIABLE = EnvironmentVariable(
     'GRADLE_COMMAND', 'The full path to the Gradle executable')
-    
+
 """Environment variable to override the Gradle executable"""
 GRADLE_HOME_ENVIRONMENT_VARIABLE = EnvironmentVariable(
     'GRADLE_HOME', 'The full path to the Gradle home')
@@ -22,6 +21,7 @@ IS_WINDOWS = os.name == 'nt'
 
 """Check OS"""
 IS_WINDOWS = os.name == 'nt'
+
 
 def which_executable(environment_variable, executable_name):
     """
@@ -37,7 +37,7 @@ def which_executable(environment_variable, executable_name):
     cmd = None
     env_cmd = os.getenv(environment_variable)
     env_home = os.getenv(GRADLE_HOME_ENVIRONMENT_VARIABLE.name)
-    
+
     # Case of GRADLE_COMMAND (colcon)
     if env_cmd is not None and Path(env_cmd).is_file():
         cmd = env_cmd
@@ -53,6 +53,7 @@ def which_executable(environment_variable, executable_name):
         cmd = shutil.which(executable_name)
 
     return cmd
+
 
 GRADLE_EXECUTABLE = which_executable(
     GRADLE_COMMAND_ENVIRONMENT_VARIABLE.name, 'gradle')
@@ -81,24 +82,26 @@ async def get_gradle_tasks(path):
         GRADLE_EXECUTABLE, 'tasks'], cwd=path)
     lines = output.decode().splitlines()
     separator = ' - '
-    return [l.split(separator)[0] for l in lines if separator in l]
+    return [line.split(separator)[0] for line in lines if separator in line]
+
 
 def has_wrapper_executable(args):
     """
     Check if Gradle wrapper executable is available on project.
-    
-    :param Arguments args: 
+
+    :param Arguments args:
     :returns: True if exist
     :rtype: bool
     """
     gradle_path = get_wrapper_executable(args)
     return gradle_path.is_file()
 
+
 def get_wrapper_executable(args):
     """
     Get Gradle wrapper executable.
-    
-    :param Arguments args: Argument 
+
+    :param Arguments args: Argument
     :returns: The path of Gradle Wrapper executable
     :rtype: Path
     """
