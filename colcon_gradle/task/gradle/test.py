@@ -4,7 +4,6 @@
 from colcon_core.logging import colcon_logger
 from colcon_core.plugin_system import satisfies_version
 from colcon_core.shell import get_command_environment
-from colcon_core.subprocess import check_output
 from colcon_core.task import run
 from colcon_core.task import TaskExtensionPoint
 from colcon_gradle.task.gradle import get_wrapper_executable
