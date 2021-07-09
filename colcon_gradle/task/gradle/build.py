@@ -4,11 +4,13 @@
 from distutils import dir_util
 import glob
 import os
+from pathlib import Path
 import shutil
 
 from colcon_core.environment import create_environment_scripts
 from colcon_core.logging import colcon_logger
 from colcon_core.plugin_system import satisfies_version
+from colcon_core.shell import create_environment_hook
 from colcon_core.shell import get_command_environment
 from colcon_core.task import run
 from colcon_core.task import TaskExtensionPoint
@@ -61,6 +63,20 @@ class GradleBuildTask(TaskExtensionPoint):
 
         logger.info(
             "Building Gradle package in '{args.path}'".format_map(locals()))
+
+        if additional_hooks is None:
+            additional_hooks = []
+
+        # add jars and classes to CLASSPATH with wildcards
+        # https://docs.oracle.com/javase/8/docs/technotes/tools/windows/classpath.html#A1100762
+        additional_hooks += create_environment_hook(
+            'classpath_jars', Path(args.install_base), pkg.name,
+            'CLASSPATH', os.path.join('share', pkg.name, 'java', '*'),
+            mode='prepend')
+        additional_hooks += create_environment_hook(
+            'classpath_classes', Path(args.install_base), pkg.name,
+            'CLASSPATH', os.path.join('share', pkg.name, 'java'),
+            mode='prepend')
 
         try:
             env = await get_command_environment(
