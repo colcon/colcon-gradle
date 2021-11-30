@@ -141,6 +141,9 @@ class GradleBuildTask(TaskExtensionPoint):
         cmd += (args.gradle_args or [])
         cmd += ['--stacktrace']
 
+        # Add install_base to environment in GRADLE_INSTALL_PREFIX
+        env['GRADLE_INSTALL_PREFIX'] = args.install_base
+
         # invoke build step
         return await run(
             self.context, cmd, cwd=args.build_base, env=env)
