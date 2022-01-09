@@ -1,8 +1,7 @@
 colcon-gradle
 =============
 
-[![Travis CI](https://travis-ci.org/colcon/colcon-gradle.svg?branch=master)](https://travis-ci.org/colcon/colcon-gradle)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/colcon/colcon-gradle?svg=true&branch=master)](https://ci.appveyor.com/project/esteve/colcon-gradle)
+[![Run tests](https://github.com/colcon/colcon-gradle/actions/workflows/ci.yaml/badge.svg)](https://github.com/colcon/colcon-gradle/actions/workflows/ci.yaml)
 
 An extension for [colcon-core](https://github.com/colcon/colcon-core) to support [Gradle](https://gradle.org) projects.
 
