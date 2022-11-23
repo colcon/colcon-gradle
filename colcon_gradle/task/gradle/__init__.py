@@ -52,7 +52,7 @@ def which_executable(environment_variable, executable_name):
     if cmd is None:
         cmd = shutil.which(executable_name)
 
-    return cmd
+    return str(cmd)
 
 
 GRADLE_EXECUTABLE = which_executable(
