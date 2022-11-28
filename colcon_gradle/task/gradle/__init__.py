@@ -46,7 +46,7 @@ def which_executable(environment_variable, executable_name):
     if cmd is None and env_home is not None:
         gradle_path = Path(env_home) / 'bin' / executable_name
         if gradle_path.is_file():
-            cmd = gradle_path
+            cmd = str(gradle_path)
 
     # fallback (from PATH)
     if cmd is None:
